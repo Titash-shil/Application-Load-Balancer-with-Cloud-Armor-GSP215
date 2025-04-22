@@ -1,41 +1,16 @@
-#!/bin/bash
-# Color definitions
-BLACK='\033[0;30m'
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[0;37m'
-BRIGHT_BLACK='\033[0;90m'
-BRIGHT_RED='\033[0;91m'
-BRIGHT_GREEN='\033[0;92m'
-BRIGHT_YELLOW='\033[0;93m'
-BRIGHT_BLUE='\033[0;94m'
-BRIGHT_PURPLE='\033[0;95m'
-BRIGHT_CYAN='\033[0;96m'
-BRIGHT_WHITE='\033[0;97m'
-BOLD='\033[1m'
-UNDERLINE='\033[4m'
-RESET='\033[0m'
-
-# Clear screen and display welcome banner
-clear
-
 
 # Collect user input
 # Collect user input
-read -p "${BRIGHT_GREEN}${BOLD}Enter the first REGION: ${RESET}" REGION1
-echo -e "${BRIGHT_BLUE}${BOLD}First REGION set to:${RESET} ${BRIGHT_CYAN}${BOLD}$REGION1${RESET}"
+read -p "Enter the first REGION: " REGION1
+echo -e "First REGION set to:"
 echo
 
-read -p "${BRIGHT_GREEN}${BOLD}Enter the second REGION: ${RESET}" REGION2
-echo -e "${BRIGHT_BLUE}${BOLD}Second REGION set to:${RESET} ${BRIGHT_CYAN}${BOLD}$REGION2${RESET}"
+read -p "Enter the second REGION: " REGION2
+echo -e "Second REGION set to:"
 echo
 
-read -p "${BRIGHT_GREEN}${BOLD}Enter the VM_ZONE: ${RESET}" VM_ZONE
-echo -e "${BRIGHT_BLUE}${BOLD}VM_ZONE set to:${RESET} ${BRIGHT_CYAN}${BOLD}$VM_ZONE${RESET}"
+read -p "Enter the VM_ZONE: " VM_ZONE
+echo -e "VM_ZONE set to:"
 echo
 
 # Export variables
@@ -45,12 +20,12 @@ export INSTANCE_NAME_2=$REGION2-mig
 
 # Function to display status messages
 status() {
-    echo -e "${BRIGHT_BLUE}${BOLD}[$(date +'%T')] ${1}${RESET}"
+    echo -e "[$(date +'%T')] ${1}${RESET}"
 }
 
 # Function to handle errors
 error() {
-    echo -e "${BRIGHT_YELLOW}${BOLD}[ERROR] ${1}${RESET}"
+    echo -e "[ERROR] ${1}${RESET}"
     exit 1
 }
 
@@ -225,7 +200,7 @@ sleep 60
 
 status "Retrieving siege VM external IP..."
 export EXTERNAL_IP=$(gcloud compute instances describe siege-vm --zone=$VM_ZONE --format="get(networkInterfaces[0].accessConfigs[0].natIP)") || error "Failed to get siege VM IP"
-echo -e "${BRIGHT_GREEN}Siege VM External IP: ${BRIGHT_CYAN}$EXTERNAL_IP${RESET}"
+echo -e "Siege VM External IP: EXTERNAL_IP"
 sleep 20
 
 status "Creating Cloud Armor security policy..."
@@ -263,12 +238,9 @@ sleep 60
 
 status "Retrieving load balancer IP address..."
 LB_IP_ADDRESS=$(gcloud compute forwarding-rules describe http-lb-forwarding-rule --global --format="value(IPAddress)") || error "Failed to get LB IP"
-echo -e "${BRIGHT_GREEN}Load Balancer IP Address: ${BRIGHT_CYAN}$LB_IP_ADDRESS${RESET}"
+echo -e "Load Balancer IP Address: LB_IP_ADDRESS"
 
 status "Running siege test from the siege VM..."
 gcloud compute ssh --zone "$VM_ZONE" "siege-vm" --project "$DEVSHELL_PROJECT_ID" --quiet \
     --command "sudo apt-get -y update && sudo apt-get -y install siege && export LB_IP=$LB_IP_ADDRESS && echo 'Starting siege test...' && siege -c 150 -t 120s http://\$LB_IP && echo 'Siege test finished.'" || error "Siege test failed"
 
-echo
-echo "${RED_TEXT}${BOLD_TEXT}Don't forget to subscribe to my Channel (QwikLab Explorers):${RESET_FORMAT} ${BLUE_TEXT}${BOLD_TEXT}https://www.youtube.com/@qwiklabexplorers${RESET_FORMAT}"
-echo
