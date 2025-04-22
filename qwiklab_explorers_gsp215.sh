@@ -12,13 +12,13 @@ BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
 clear
 
-echo
 
-read -p "${GREEN_TEXT}${BOLD_TEXT}Enter you lab's first REGION: ${RESET_FORMAT}" REGION1
 
-read -p "${GREEN_TEXT}${BOLD_TEXT}Enter your lab's second REGION: ${RESET_FORMAT}" REGION2
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter the first REGION: ${RESET_FORMAT}" REGION1
 
-read -p "${GREEN_TEXT}${BOLD_TEXT}Enter your lab's VM_ZONE: ${RESET_FORMAT}" VM_ZONE
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter the second REGION: ${RESET_FORMAT}" REGION2
+
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter the VM_ZONE: ${RESET_FORMAT}" VM_ZONE
 
 
 # Export variables after collecting input
@@ -54,8 +54,7 @@ echo
 DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
 TOKEN=$(gcloud auth application-default print-access-token)
 
-echo "${GREEN_TEXT}${BOLD_TEXT}Defining a global TCP health check for the load balancer...${RESET_FORMAT}"
-echo
+
 # Create TCP Health Check
 curl -X POST -H "Content-Type: application/json" \
     -H "Authorization: Bearer $TOKEN" \
@@ -76,9 +75,8 @@ curl -X POST -H "Content-Type: application/json" \
         "unhealthyThreshold": 2
     }' \
     "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/global/healthChecks"
-echo
-sleep 60
-echo
+
+
 
 # Create Backend Services
 curl -X POST -H "Content-Type: application/json" \
@@ -131,6 +129,7 @@ curl -X POST -H "Content-Type: application/json" \
     "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/global/backendServices"
 
 
+
 # Create URL Map
 curl -X POST -H "Content-Type: application/json" \
     -H "Authorization: Bearer $TOKEN" \
@@ -152,6 +151,7 @@ curl -X POST -H "Content-Type: application/json" \
     "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/global/targetHttpProxies"
 
 
+
 # Create Forwarding Rule
 curl -X POST -H "Content-Type: application/json" \
     -H "Authorization: Bearer $TOKEN" \
@@ -165,6 +165,7 @@ curl -X POST -H "Content-Type: application/json" \
         "target": "projects/'"$DEVSHELL_PROJECT_ID"'/global/targetHttpProxies/http-lb-target-proxy"
     }' \
     "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/global/forwardingRules"
+
 
 
 # Create another Target HTTP Proxy
@@ -218,13 +219,14 @@ curl -X POST -H "Content-Type: application/json" \
         ]
     }' \
     "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/regions/$REGION1/instanceGroups/$INSTANCE_NAME/setNamedPorts"
-echo
 
 
 gcloud compute instances create siege-vm --project=$DEVSHELL_PROJECT_ID --zone=$VM_ZONE --machine-type=e2-medium --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default --metadata=enable-oslogin=true --maintenance-policy=MIGRATE --provisioning-model=STANDARD --create-disk=auto-delete=yes,boot=yes,device-name=siege-vm,image=projects/debian-cloud/global/images/debian-11-bullseye-v20230629,mode=rw,size=10,type=projects/$DEVSHELL_PROJECT_ID/zones/us-central1-c/diskTypes/pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --labels=goog-ec-src=vm_add-gcloud --reservation-affinity=any
-echo
+
+
 
 export EXTERNAL_IP=$(gcloud compute instances describe siege-vm --zone=$VM_ZONE --format="get(networkInterfaces[0].accessConfigs[0].natIP)")
+
 
 curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" \
     -d '{
@@ -276,10 +278,12 @@ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Co
     }" \
     "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/global/backendServices/http-backend/setSecurityPolicy"
 
+
+
 LB_IP_ADDRESS=$(gcloud compute forwarding-rules describe http-lb-forwarding-rule --global --format="value(IPAddress)")
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Siege command: siege -c 150 -t 120s http://$LB_IP_ADDRESS${RESET_FORMAT}"
-echo
+
+
 gcloud compute ssh --zone "$VM_ZONE" "siege-vm" --project "$DEVSHELL_PROJECT_ID" --quiet --command "sudo apt-get -y update && sudo apt-get -y install siege && export LB_IP=$LB_IP_ADDRESS && echo 'Starting siege test...' && siege -c 150 -t 120s http://\$LB_IP && echo 'Siege test finished.'"
 
 
