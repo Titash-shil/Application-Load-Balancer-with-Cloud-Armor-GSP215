@@ -10,11 +10,11 @@
  - ### Copy & Run the Commands in Cloud Shell Terminal :
 
 ```
-curl -LO raw.githubusercontent.com/Titash-shil/Cloud-Spanner---Defining-Schemas-and-Understanding-Query-Plans-GSP1050/refs/heads/main/qwiklab_explorers_gsp1050.sh
+curl -LO raw.githubusercontent.com/Titash-shil/Application-Load-Balancer-with-Cloud-Armor-GSP215/refs/heads/main/qwiklab_explorers_gsp215.sh
 
-sudo chmod +x qwiklab_explorers_gsp1050.sh
+sudo chmod +x qwiklab_explorers_gsp215.sh
 
-./qwiklab_explorers_gsp1050.sh
+./qwiklab_explorers_gsp215.sh
 ```
 
 ---
