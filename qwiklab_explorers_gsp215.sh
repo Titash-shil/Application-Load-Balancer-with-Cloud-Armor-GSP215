@@ -25,16 +25,16 @@ clear
 
 
 # Collect user input
-read -p "${BRIGHT_GREEN}${BOLD}Enter the first REGION: ${RESET}" REGION1
-echo -e "${BRIGHT_PURPLE}${BOLD}First REGION set to:${RESET} ${BRIGHT_CYAN}${BOLD}$REGION1${RESET}"
+read -p "${BRIGHT_YELLOW}${BOLD}Enter the first REGION: ${RESET}" REGION1
+echo -e "${BRIGHT_GREEN}${BOLD}First REGION set to:${RESET} ${BRIGHT_CYAN}${BOLD}$REGION1${RESET}"
 echo
 
-read -p "${BRIGHT_GREEN}${BOLD}Enter the second REGION: ${RESET}" REGION2
-echo -e "${BRIGHT_PURPLE}${BOLD}Second REGION set to:${RESET} ${BRIGHT_CYAN}${BOLD}$REGION2${RESET}"
+read -p "${BRIGHT_YELLOW}${BOLD}Enter the second REGION: ${RESET}" REGION2
+echo -e "${BRIGHT_GREEN}${BOLD}Second REGION set to:${RESET} ${BRIGHT_CYAN}${BOLD}$REGION2${RESET}"
 echo
 
-read -p "${BRIGHT_GREEN}${BOLD}Enter the VM_ZONE: ${RESET}" VM_ZONE
-echo -e "${BRIGHT_PURPLE}${BOLD}VM_ZONE set to:${RESET} ${BRIGHT_CYAN}${BOLD}$VM_ZONE${RESET}"
+read -p "${BRIGHT_YELLOW}${BOLD}Enter the VM_ZONE: ${RESET}" VM_ZONE
+echo -e "${BRIGHT_GREEN}${BOLD}VM_ZONE set to:${RESET} ${BRIGHT_CYAN}${BOLD}$VM_ZONE${RESET}"
 echo
 
 # Export variables
@@ -267,3 +267,4 @@ echo -e "${BRIGHT_GREEN}Load Balancer IP Address: ${BRIGHT_CYAN}$LB_IP_ADDRESS${
 status "Running siege test from the siege VM..."
 gcloud compute ssh --zone "$VM_ZONE" "siege-vm" --project "$DEVSHELL_PROJECT_ID" --quiet \
     --command "sudo apt-get -y update && sudo apt-get -y install siege && export LB_IP=$LB_IP_ADDRESS && echo 'Starting siege test...' && siege -c 150 -t 120s http://\$LB_IP && echo 'Siege test finished.'" || error "Siege test failed"
+
